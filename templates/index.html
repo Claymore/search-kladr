@@ -1,0 +1,12 @@
+<head>
+	<title>КЛАДР</title>
+</head>
+<body>
+<form action="/search/" method="POST">
+Название объекта: <input name="geo_object_name" type="text" size="40"><input type="submit" value="Искать">
+</form>
+Регионы:
+<ul>
+{{range $r := .}} <li><a href='/region/{{$r.Id}}'>{{$r.Name}} {{$r.Type}}<a/></li>{{end}}
+</ul>
+</body>

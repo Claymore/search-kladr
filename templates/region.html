@@ -1,0 +1,23 @@
+<head>
+	<title>{{.Name}}</title>
+</head>
+<body>
+<form action="/search/" method="POST">
+Название объекта: <input name="geo_object_name" type="text" size="40"><input type="submit" value="Искать">
+</form>
+{{.Name}} {{.Type}}:
+<ul>
+	<li>Города:
+		<ul>
+			{{range $c := .Cities}}
+			<li><a href='/city/{{$c.Id}}'>{{$c.Name}} {{$c.Type}}<a/></li>{{end}}
+		</ul>
+	</li>
+	<li>Районы:
+		<ul>
+			{{range $a := .Areas}}
+			<li><a href='/area/{{$a.Id}}'>{{$a.Name}} {{$a.Type}}<a/></li>{{end}}
+		</ul>
+	</li>
+</ul>
+</body>

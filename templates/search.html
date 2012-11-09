@@ -1,0 +1,39 @@
+<head>
+	<title>Результаты поиска по КЛАДР</title>
+</head>
+<body>
+<form action="/search/" method="POST">
+Название объекта: <input name="geo_object_name" type="text" size="40" value="{{.Query}}"><input type="submit" value="Искать">
+</form>
+Найдены следующие административные объекты:
+<ul>
+	{{if .Regions}}<li>Регионы:
+		<ul>
+			{{range $c := .Regions}}
+			<li><a href='/region/{{$c.Id}}'>{{$c.Name}} {{$c.Type}}<a/></li>{{end}}
+		</ul>
+	</li>
+	{{end}}
+	{{if .Cities}}<li>Города:
+		<ul>
+			{{range $c := .Cities}}
+			<li><a href='/city/{{$c.Id}}'>{{$c.Name}} {{$c.Type}}<a/></li>{{end}}
+		</ul>
+	</li>
+	{{end}}
+	{{if .Areas}}<li>Районы:
+		<ul>
+			{{range $c := .Areas}}
+			<li><a href='/area/{{$c.Id}}'>{{$c.Name}} {{$c.Type}}<a/></li>{{end}}
+		</ul>
+	</li>
+	{{end}}
+	{{if .Settlements}}<li>Населённые пункты:
+		<ul>
+			{{range $s := .Settlements}}
+			<li><a href='/settlement/{{$s.Id}}'>{{$s.Name}} {{$s.Type}}<a/></li>{{end}}
+		</ul>
+	</li>
+	{{end}}
+</ul>
+</body>
