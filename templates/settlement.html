@@ -1,0 +1,13 @@
+<head>
+	<title>{{.Name}}</title>
+</head>
+<body>
+<form action="/search/" method="POST">
+Название объекта: <input name="geo_object_name" type="text" size="40"><input type="submit" value="Искать">
+</form>
+Улицы {{.Name}} {{.Type}}:
+<ul>
+	{{range $s := .Streets}}
+	<li>{{$s.Name}} {{$s.Type}}</li>{{end}}
+</ul>
+</body>
