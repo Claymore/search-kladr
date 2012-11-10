@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	_ "github.com/bmizerany/pq"
 	"html/template"
@@ -45,7 +46,16 @@ type SearchResult struct {
 	Query       string
 }
 
+type Config struct {
+	User     string
+	Password string
+	Host     string
+	Port     uint64
+	Name     string
+}
+
 var templates = template.Must(template.ParseFiles("templates/index.html", "templates/region.html", "templates/area.html", "templates/city.html", "templates/settlement.html", "templates/search.html"))
+var configDB = &Config{User: "postgres", Password: "billing", Host: "localhost", Port: 5432, Name: "kladr"}
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	err := templates.ExecuteTemplate(w, tmpl+".html", data)
@@ -54,8 +64,12 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	}
 }
 
+func getConnectionString(config *Config) string {
+	return fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s", config.User, config.Password, config.Host, config.Port, config.Name)
+}
+
 func searchGeoObjectsByName(name string) (result *SearchResult, err error) {
-	db, err := sql.Open("postgres", "user=postgres password=billing host=localhost port=5432 dbname=kladr")
+	db, err := sql.Open("postgres", getConnectionString(configDB))
 	if err != nil {
 		return result, err
 	}
@@ -95,7 +109,7 @@ func searchGeoObjectsByName(name string) (result *SearchResult, err error) {
 }
 
 func getRegions() (objects []geoObject, err error) {
-	db, err := sql.Open("postgres", "user=postgres password=billing host=localhost port=5432 dbname=kladr")
+	db, err := sql.Open("postgres", getConnectionString(configDB))
 	if err != nil {
 		return objects, err
 	}
@@ -122,7 +136,7 @@ func getRegions() (objects []geoObject, err error) {
 }
 
 func getRegion(id string) (region *Region, err error) {
-	db, err := sql.Open("postgres", "user=postgres password=billing host=localhost port=5432 dbname=kladr")
+	db, err := sql.Open("postgres", getConnectionString(configDB))
 	if err != nil {
 		return region, err
 	}
@@ -162,7 +176,7 @@ func getRegion(id string) (region *Region, err error) {
 }
 
 func getArea(id string) (area *Area, err error) {
-	db, err := sql.Open("postgres", "user=postgres password=billing host=localhost port=5432 dbname=kladr")
+	db, err := sql.Open("postgres", getConnectionString(configDB))
 	if err != nil {
 		return area, err
 	}
@@ -201,7 +215,7 @@ func getArea(id string) (area *Area, err error) {
 }
 
 func getCity(id string) (city *City, err error) {
-	db, err := sql.Open("postgres", "user=postgres password=billing host=localhost port=5432 dbname=kladr")
+	db, err := sql.Open("postgres", getConnectionString(configDB))
 	if err != nil {
 		return city, err
 	}
@@ -245,7 +259,7 @@ func getCity(id string) (city *City, err error) {
 }
 
 func getSettlement(id string) (settlement *Settlement, err error) {
-	db, err := sql.Open("postgres", "user=postgres password=billing host=localhost port=5432 dbname=kladr")
+	db, err := sql.Open("postgres", getConnectionString(configDB))
 	if err != nil {
 		return settlement, err
 	}
@@ -346,11 +360,20 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 }
 
 func main() {
+	var address string
+	flag.StringVar(&configDB.User, "dbuser", "postgres", "database user")
+	flag.StringVar(&configDB.Password, "dbpassword", "billing", "database password")
+	flag.StringVar(&configDB.Host, "dbhost", "localhost", "database host")
+	flag.StringVar(&configDB.Name, "dbname", "kladr", "database name")
+	flag.Uint64Var(&configDB.Port, "dbport", 5432, "database port")
+	flag.StringVar(&address, "address", ":8080", "listen and serve on this address")
+	flag.Parse()
+
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/region/", makeHandler(regionHandler))
 	http.HandleFunc("/city/", makeHandler(cityHandler))
 	http.HandleFunc("/area/", makeHandler(areaHandler))
 	http.HandleFunc("/settlement/", makeHandler(settlementHandler))
 	http.HandleFunc("/search/", searchHandler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(address, nil)
 }
