@@ -27,7 +27,7 @@ func main() {
 	}
 	fmt.Fprintln(file, "ALTER TABLE kladr ADD CONSTRAINT pk_kladr PRIMARY KEY (code);")
 	fmt.Fprintln(file, "ALTER TABLE street ADD CONSTRAINT pk_street PRIMARY KEY (code);")
-	fmt.Fprintln(file, "CREATE INDEX i_kladr_name ON kladr (name, code);")
+	fmt.Fprintln(file, "CREATE INDEX i_kladr_name ON kladr (UPPER(name), code);")
 	fmt.Fprintln(file, "CREATE INDEX i_street_name ON street (name, code);")
 	file.Close()
 	log.Println("Downloading...")
