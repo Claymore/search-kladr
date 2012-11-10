@@ -38,11 +38,11 @@ type Area struct {
 }
 
 type SearchResult struct {
-	Regions  []geoObject
-	Areas  []geoObject
+	Regions     []geoObject
+	Areas       []geoObject
 	Cities      []geoObject
 	Settlements []geoObject
-	Query string
+	Query       string
 }
 
 var templates = template.Must(template.ParseFiles("templates/index.html", "templates/region.html", "templates/area.html", "templates/city.html", "templates/settlement.html", "templates/search.html"))
