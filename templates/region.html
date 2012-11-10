@@ -3,7 +3,10 @@
 </head>
 <body>
 <form action="/search/" method="POST">
-Название объекта: <input name="geo_object_name" type="text" size="40"><input type="submit" value="Искать">
+Название объекта: <input name="geo_object_name" type="text" size="40">
+<input type="checkbox" name="local_search" checked>Искать только в разделе
+<input type="hidden" name="code" value="{{.Id}}">
+<input type="submit" value="Искать">
 </form>
 {{.Name}} {{.Type}}:
 <ul>

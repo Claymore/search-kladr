@@ -69,13 +69,22 @@ func getConnectionString(config *Config) string {
 	return fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s", config.User, config.Password, config.Host, config.Port, config.Name)
 }
 
-func searchGeoObjectsByName(name string) (result *SearchResult, err error) {
+func searchGeoObjectsByName(name string, code string) (result *SearchResult, err error) {
 	db, err := sql.Open("postgres", getConnectionString(configDB))
 	if err != nil {
 		return result, err
 	}
 	defer db.Close()
-	objectStmt, err := db.Prepare("SELECT name, socr, code FROM kladr WHERE code LIKE '___________00' AND name LIKE $1")
+	var stmt string
+	switch {
+	case strings.HasSuffix(code, "0000000000"):
+		stmt = fmt.Sprintf("SELECT name, socr, code FROM kladr WHERE code LIKE '%s_________00' AND UPPER(name) LIKE UPPER($1)", code[:2])
+	case strings.HasSuffix(code, "00000000"):
+		stmt = fmt.Sprintf("SELECT name, socr, code FROM kladr WHERE code LIKE '%s______00' AND UPPER(name) LIKE UPPER($1)", code[:5])
+	default:
+		stmt = "SELECT name, socr, code FROM kladr WHERE code LIKE '___________00' AND UPPER(name) LIKE UPPER($1)"
+	}
+	objectStmt, err := db.Prepare(stmt)
 	if err != nil {
 		return result, err
 	}
@@ -313,7 +322,11 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
-	result, err := searchGeoObjectsByName(r.FormValue("geo_object_name"))
+	code := ""
+	if r.FormValue("local_search") == "on" {
+		code = r.FormValue("code")
+	}
+	result, err := searchGeoObjectsByName(r.FormValue("geo_object_name"), code)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
