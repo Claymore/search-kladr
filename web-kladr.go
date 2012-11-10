@@ -7,6 +7,7 @@ import (
 	_ "github.com/bmizerany/pq"
 	"html/template"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -351,8 +352,14 @@ func settlementHandler(w http.ResponseWriter, r *http.Request, code string) {
 	renderTemplate(w, "settlement", settlement)
 }
 
+var urlValidator = regexp.MustCompile("^/(region|city|area|settlement)/[0-9]{13}$")
+
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if !urlValidator.MatchString(r.URL.Path) {
+			http.NotFound(w, r)
+			return
+		}
 		slashIndex := strings.IndexRune(r.URL.Path[1:], '/')
 		code := r.URL.Path[slashIndex+2:]
 		fn(w, r, code)
